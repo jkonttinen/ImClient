@@ -10,11 +10,16 @@
 
 #include <iostream>
 #include <sstream>
-#include <cstdio>
+//#include <cstdio>
 
-#include <gtkmm.h>      //OK for now. Only include what is needed later?
-//#include <gtkmm/button.h>
-//#include <gtkmm/window.h>
-//#include <gtkmm/main.h>
+//#include <gtkmm.h>      //OK for now. Only include what is needed later?
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/togglebutton.h>
+#include <gtkmm/window.h>
+#include <gtkmm/main.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/table.h>
+#include <gtkmm/object.h>
 
 #endif //STDAFX_HH
