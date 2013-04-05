@@ -10,7 +10,7 @@
 
 #include <iostream>
 #include <sstream>
-//#include <cstdio>
+#include <vector>
 
 //#include <gtkmm.h>      //OK for now. Only include what is needed later?
 #include <gtkmm/box.h>
@@ -21,5 +21,8 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/table.h>
 #include <gtkmm/object.h>
+#include <gtkmm/uimanager.h>
+#include <gtkmm/actiongroup.h>
+#include <gtkmm/stock.h>
 
 #endif //STDAFX_HH

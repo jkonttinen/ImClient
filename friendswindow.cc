@@ -1,56 +1,81 @@
 #include "stdafx.hh"
 #include "friendswindow.hh"
 
-FriendsWindow::FriendsWindow()
-    : m_Table(1, 10), m_Button_Close("Close"), m_Button_Chat("Chat")
+FriendsWindow::FriendsWindow(std::vector<Glib::ustring> names)
+    : names(names), m_Table(names.size(),1), m_Button_Close("Close"), m_Button_Chat("Chat")
 {
     set_title("Friends");
-    set_border_width(0);
+    set_border_width(1);
     set_size_request(300, 300);
+    m_ScrolledWindow.set_border_width(5);
 
-    m_ScrolledWindow.set_border_width(10);
-
-    /* the policy is one of Gtk::POLICY AUTOMATIC, or Gtk::POLICY_ALWAYS.
-     * Gtk::POLICY_AUTOMATIC will automatically decide whether you need
-     * scrollbars, whereas Gtk::POLICY_ALWAYS will always leave the scrollbars
-     * there.  The first one is the horizontal scrollbar, the second,
-     * the vertical. */
     m_ScrolledWindow.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
     add(vBox);
-    vBox.pack_start(m_ScrolledWindow);
-    vBox.pack_start(hBox, Gtk::PackOptions::PACK_SHRINK,1);
 
-    /* set the spacing to 1 on x and 10 on y */
-    m_Table.set_row_spacings(10);
-    m_Table.set_col_spacings(1);
+    //menu stuff
+    m_refActionGroup = Gtk::ActionGroup::create();
+
+    m_refActionGroup->add(Gtk::Action::create("FileMenu", "File"));
+    m_refActionGroup->add(Gtk::Action::create("FileNick", "Nickname"),
+                          sigc::mem_fun(*this, &FriendsWindow::on_menu_nick));
+    m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT),
+                          sigc::mem_fun(*this, &FriendsWindow::on_quit));
+
+    m_refUIManager = Gtk::UIManager::create();
+    m_refUIManager->insert_action_group(m_refActionGroup);
+
+    add_accel_group(m_refUIManager->get_accel_group());
+
+    Glib::ustring ui_info =
+        "<ui>"
+        "  <menubar name='MenuBar'>"
+        "    <menu action='FileMenu'>"
+        "      <menuitem action='FileNick'/>"
+        "      <separator/>"
+        "      <menuitem action='FileQuit'/>"
+        "    </menu>"
+        "   </menubar>"
+        "</ui>";
+
+    try
+    {
+        m_refUIManager->add_ui_from_string(ui_info);
+    }
+    catch(const Glib::Error& ex)
+    {
+        std::cerr << "building menus failed: " <<  ex.what();
+    }
+
+    Gtk::Widget* pMenubar = m_refUIManager->get_widget("/MenuBar");
+    if(pMenubar)
+        vBox.pack_start(*pMenubar, Gtk::PACK_SHRINK);
+
+//    /* set the spacing to 1 on x and 10 on y */
+//    m_Table.set_row_spacings(10);
+//    m_Table.set_col_spacings(1);
 
     /* pack the table into the scrolled window */
     m_ScrolledWindow.add(m_Table);
 
-    /* this simply creates a grid of toggle buttons on the table
-     * to demonstrate the scrolled window. */
-    for(int i = 0; i < 1; i++)
+    for(size_t i = 0; i < names.size(); i++)
     {
-        for(int j = 0; j < 10; j++)
-        {
-            char buffer[32];
-            sprintf(buffer, "button (%d,%d)\n", i, j);
-            Gtk::Button* pButton = Gtk::manage(new Gtk::ToggleButton(buffer));
-            m_Table.attach(*pButton, i, i + 1, j, j + 1);
-        }
+        Gtk::Button* pButton = Gtk::manage(new Gtk::ToggleButton(names[i]));
+        m_Table.attach(*pButton, 0, 1, i, i + 1);
     }
+
 
     /* Add a "close" button to the bottom of the dialog */
     m_Button_Close.signal_clicked().connect( sigc::mem_fun(*this,
-            &FriendsWindow::on_button_close));
+            &FriendsWindow::on_quit));
     m_Button_Close.signal_clicked().connect( sigc::mem_fun(*this,
             &FriendsWindow::on_button_chat));
 
     /* this makes it so the button is the default. */
     m_Button_Chat.set_can_default();
 
-    //Gtk::Box* pBox = vBox.get_action_area();
-    //if(vBox){
+    vBox.pack_start(m_ScrolledWindow);
+    vBox.pack_start(hBox, Gtk::PackOptions::PACK_SHRINK,1);
+
     hBox.pack_start(m_Button_Chat);
     hBox.pack_start(m_Button_Close);
 
@@ -66,7 +91,7 @@ FriendsWindow::~FriendsWindow()
 {
 }
 
-void FriendsWindow::on_button_close()
+void FriendsWindow::on_quit()
 {
     hide();
 }
@@ -75,3 +100,9 @@ void FriendsWindow::on_button_chat()
 {
 
 }
+
+void FriendsWindow::on_menu_nick()
+{
+
+}
+

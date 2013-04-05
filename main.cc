@@ -5,7 +5,13 @@ int main(int argc, char *argv[])
 {
   Gtk::Main kit(argc, argv);
 
-  FriendsWindow window;
+  std::vector<Glib::ustring> asd;
+  asd.push_back("rambake");
+  asd.push_back("Mr. Nobody's Friend");
+  asd.push_back("diukkari");
+  asd.push_back("Mr. Mianki");
+
+  FriendsWindow window(asd);
   //Shows the window and returns when it is closed.
   Gtk::Main::run(window);
 
