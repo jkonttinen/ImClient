@@ -1,7 +1,7 @@
 #include "stdafx.hh"
 #include "friendswindow.hh"
 
-FriendsWindow::FriendsWindow(std::vector<Glib::ustring> names)
+FriendsWindow::FriendsWindow(std::list<Glib::ustring> names)
     : names(names), m_Table(names.size(),1), m_Button_Close("Close"), m_Button_Chat("Chat")
 {
     set_title("Friends");
@@ -56,22 +56,23 @@ FriendsWindow::FriendsWindow(std::vector<Glib::ustring> names)
 
     /* pack the table into the scrolled window */
     m_ScrolledWindow.add(m_Table);
-
-    for(size_t i = 0; i < names.size(); i++)
+    names.sort();
+    size_t i = 0;
+    for(auto it = names.begin(); it != names.end(); it++)
     {
-        Gtk::Button* pButton = Gtk::manage(new Gtk::ToggleButton(names[i]));
+        Gtk::Button* pButton = Gtk::manage(new Gtk::ToggleButton(*it));
+        buttons.push_back(pButton);
         m_Table.attach(*pButton, 0, 1, i, i + 1);
+        i++;
     }
 
 
     /* Add a "close" button to the bottom of the dialog */
     m_Button_Close.signal_clicked().connect( sigc::mem_fun(*this,
             &FriendsWindow::on_quit));
-    m_Button_Close.signal_clicked().connect( sigc::mem_fun(*this,
+    m_Button_Chat.signal_clicked().connect( sigc::mem_fun(*this,
             &FriendsWindow::on_button_chat));
 
-    /* this makes it so the button is the default. */
-    m_Button_Chat.set_can_default();
 
     vBox.pack_start(m_ScrolledWindow);
     vBox.pack_start(hBox, Gtk::PackOptions::PACK_SHRINK,1);
@@ -82,6 +83,7 @@ FriendsWindow::FriendsWindow(std::vector<Glib::ustring> names)
 
     /* This grabs this button to be the default button. Simply hitting
      * the "Enter" key will cause this button to activate. */
+    m_Button_Chat.set_can_default();
     m_Button_Chat.grab_default();
 
     show_all_children();
@@ -98,7 +100,19 @@ void FriendsWindow::on_quit()
 
 void FriendsWindow::on_button_chat()
 {
+    names.push_back("Jusku");
+    names.sort();
+    Gtk::Button* button = Gtk::manage(new Gtk::ToggleButton());
 
+    m_Table.attach(*button, 0, 1, names.size()-1, names.size());
+    buttons.push_back(button);
+    auto itt = buttons.begin();
+    for (auto it = names.begin(); it != names.end();it++){
+        (*itt)->set_label(*it);
+        itt++;
+    }
+
+    show_all_children();
 }
 
 void FriendsWindow::on_menu_nick()

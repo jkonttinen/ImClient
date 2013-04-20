@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
 {
   Gtk::Main kit(argc, argv);
 
-  std::vector<Glib::ustring> asd;
+  std::list<Glib::ustring> asd;
   asd.push_back("rambake");
   asd.push_back("Mr. Nobody's Friend");
   asd.push_back("diukkari");

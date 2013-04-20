@@ -6,7 +6,7 @@
 class FriendsWindow : public Gtk::Window
 {
 public:
-    FriendsWindow(std::vector<Glib::ustring>);
+    FriendsWindow(std::list<Glib::ustring>);
     virtual ~FriendsWindow();
 
 protected:
@@ -15,7 +15,8 @@ protected:
     void on_button_chat();
     void on_menu_nick();
 
-    std::vector<Glib::ustring> names;
+    std::list<Glib::ustring> names;
+    std::list<Gtk::Button*> buttons;
 
     //Child widgets:
     Gtk::ScrolledWindow m_ScrolledWindow;

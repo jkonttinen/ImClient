@@ -10,7 +10,7 @@
 
 #include <iostream>
 #include <sstream>
-#include <vector>
+#include <list>
 
 //#include <gtkmm.h>      //OK for now. Only include what is needed later?
 #include <gtkmm/box.h>
