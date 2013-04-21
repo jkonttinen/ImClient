@@ -1,8 +1,9 @@
 #include "stdafx.hh"
 #include "friendswindow.hh"
+#include "namedialog.hh"
 
 FriendsWindow::FriendsWindow(std::list<Glib::ustring> names)
-    : names(names), m_Table(names.size(),1), m_Button_Close("Close"), m_Button_Chat("Chat")
+    : m_Table(names.size(),1), m_Button_Close("Close"), m_Button_Chat("Chat")
 {
     set_title("Friends");
     set_border_width(1);
@@ -56,15 +57,16 @@ FriendsWindow::FriendsWindow(std::list<Glib::ustring> names)
 
     /* pack the table into the scrolled window */
     m_ScrolledWindow.add(m_Table);
-    names.sort();
-    size_t i = 0;
-    for(auto it = names.begin(); it != names.end(); it++)
-    {
-        Gtk::Button* pButton = Gtk::manage(new Gtk::ToggleButton(*it));
-        buttons.push_back(pButton);
-        m_Table.attach(*pButton, 0, 1, i, i + 1);
-        i++;
-    }
+//    names.sort();
+//    size_t i = 0;
+//    for(auto it = names.begin(); it != names.end(); it++)
+//    {
+//        Gtk::ToggleButton* pButton = Gtk::manage(new Gtk::ToggleButton(*it));
+//        buttons[*it] = pButton;
+//        m_Table.attach(*pButton, 0, 1, i, i + 1);
+//        i++;
+//    }
+    set_namelist(names);
 
 
     /* Add a "close" button to the bottom of the dialog */
@@ -89,6 +91,32 @@ FriendsWindow::FriendsWindow(std::list<Glib::ustring> names)
     show_all_children();
 }
 
+void FriendsWindow::set_namelist(std::list<Glib::ustring> names)
+{
+    for (auto it = buttons.begin();it != buttons.end();){
+        m_Table.remove(*(it->second));
+        auto help = it;
+        help++;
+        for (auto it1 = names.begin();it1 != names.end();){
+            if (*it1 == (it->first)) break;
+            it1++;
+            if (it1 == names.end()) buttons.erase(it);
+        }
+        it = help;
+    }
+    for (auto it = names.begin();it != names.end();it++){
+        if (buttons.find(*it) == buttons.end())
+            buttons[*it] = Gtk::manage(new Gtk::ToggleButton(*it));
+    }
+    size_t i= 0;
+    for (auto it = buttons.begin(); it != buttons.end();it++){
+        m_Table.attach(*(it->second), 0, 1, i, i + 1);
+        i++;
+    }
+
+    show_all_children();
+}
+
 FriendsWindow::~FriendsWindow()
 {
 }
@@ -100,23 +128,18 @@ void FriendsWindow::on_quit()
 
 void FriendsWindow::on_button_chat()
 {
+    std::list<Glib::ustring> names;
     names.push_back("Jusku");
-    names.sort();
-    Gtk::Button* button = Gtk::manage(new Gtk::ToggleButton());
-
-    m_Table.attach(*button, 0, 1, names.size()-1, names.size());
-    buttons.push_back(button);
-    auto itt = buttons.begin();
-    for (auto it = names.begin(); it != names.end();it++){
-        (*itt)->set_label(*it);
-        itt++;
-    }
-
-    show_all_children();
+    names.push_back("diukkari");
+    names.push_back("Mr NObody");
+    names.push_back("rambake");
+    names.push_back("damb");
+    set_namelist(names);
 }
 
 void FriendsWindow::on_menu_nick()
 {
-
+    NameDialog nd;
+    nd.run();
 }
 

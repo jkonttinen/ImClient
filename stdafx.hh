@@ -7,6 +7,7 @@
 #define STDAFX_HH
 
 //#include "targetver.h" //Maybe needed with windows
+//#undef __STRICT_ANSI__
 
 #include <iostream>
 #include <sstream>
@@ -24,5 +25,7 @@
 #include <gtkmm/uimanager.h>
 #include <gtkmm/actiongroup.h>
 #include <gtkmm/stock.h>
+#include <gtkmm/dialog.h>
+#include <gtkmm/entry.h>
 
 #endif //STDAFX_HH

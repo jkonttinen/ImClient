@@ -9,14 +9,14 @@ public:
     FriendsWindow(std::list<Glib::ustring>);
     virtual ~FriendsWindow();
 
-protected:
+    void set_namelist(std::list<Glib::ustring>);
+private:
     //Signal handlers:
     void on_quit();
     void on_button_chat();
     void on_menu_nick();
 
-    std::list<Glib::ustring> names;
-    std::list<Gtk::Button*> buttons;
+    std::map<Glib::ustring, Gtk::ToggleButton*> buttons;
 
     //Child widgets:
     Gtk::ScrolledWindow m_ScrolledWindow;
