@@ -12,6 +12,7 @@
 #include <iostream>
 #include <sstream>
 #include <list>
+#include <map>
 
 //#include <gtkmm.h>      //OK for now. Only include what is needed later?
 #include <gtkmm/box.h>
@@ -27,5 +28,6 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/dialog.h>
 #include <gtkmm/entry.h>
+#include <gtkmm/notebook.h>
 
 #endif //STDAFX_HH

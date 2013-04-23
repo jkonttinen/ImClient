@@ -1,17 +1,15 @@
-#ifndef NAMEDIALOG_H
-#define NAMEDIALOG_H
-
-#include "stdafx.hh"
+#ifndef NAMEDIALOG_HH
+#define NAMEDIALOG_HH
 
 class NameDialog : public Gtk::Dialog
 {
-    public:
-        NameDialog();
-        virtual ~NameDialog();
-    protected:
-        void on_button_clicked();
-    private:
-        Gtk::Entry entry;
+public:
+    NameDialog();
+    virtual ~NameDialog();
+private:
+    void on_button_clicked();
+
+    Gtk::Entry entry;
 };
 
-#endif // NAMEDIALOG_H
+#endif // NAMEDIALOG_HH

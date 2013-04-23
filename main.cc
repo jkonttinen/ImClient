@@ -7,6 +7,8 @@ int main(int argc, char *argv[])
 
   std::list<Glib::ustring> asd;
   asd.push_back("rambake");
+  asd.push_back("damb");
+  asd.push_back("Jusku");
   asd.push_back("Mr. Nobody's Friend");
   asd.push_back("diukkari");
   asd.push_back("Mr. Mianki");

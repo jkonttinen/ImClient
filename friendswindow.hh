@@ -1,7 +1,7 @@
 #ifndef FRIENDSWINDOW_HH
 #define FRIENDSWINDOW_HH
 
-#include "stdafx.hh"
+#include "chatwindow.hh"
 
 class FriendsWindow : public Gtk::Window
 {
@@ -28,6 +28,8 @@ private:
 
     Gtk::VBox vBox;
     Gtk::HBox hBox;
+
+    ChatWindow *chatWin;
 };
 
 #endif //FRIENDSWINDOW_HH

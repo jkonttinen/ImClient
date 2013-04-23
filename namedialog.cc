@@ -1,15 +1,14 @@
 #include "stdafx.hh"
 #include "namedialog.hh"
 
-NameDialog::NameDialog()
+NameDialog::NameDialog() : entry()
 {
     set_title("Choose nickname");
 
-    Gtk::VBox *vBox = get_vbox();
-    Gtk::Button *button = new Gtk::Button(Gtk::Stock::OK);
+    Gtk::Button *button = Gtk::manage(new Gtk::Button(Gtk::Stock::OK));
 
-    vBox->pack_start(entry);
-    vBox->pack_start(*button);
+    get_vbox()->pack_start(entry);
+    get_vbox()->pack_start(*button);
 
     button->set_can_default();
     button->grab_default();

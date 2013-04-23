@@ -1,13 +1,10 @@
 #ifndef MESSAGES_HH
 #define MESSAGES_HH
 
-#include "stdafx.hh"
-
 class Message
 {
 public:
-    enum MsgType
-    {
+    enum MsgType {
         NONE,
         MESSAGE,
         CHAT_MESSAGE,
