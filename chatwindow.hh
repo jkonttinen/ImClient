@@ -4,12 +4,14 @@
 class ChatWindow : public Gtk::Window
 {
 public:
-    ChatWindow(std::list<Glib::ustring>);
+    ChatWindow(const std::list<Glib::ustring>&, const Glib::ustring&);
     virtual ~ChatWindow();
 
-    void new_tab(std::list<Glib::ustring>);
+    void new_tab(const std::list<Glib::ustring>&);
+    void set_nick(const Glib::ustring&);
 private:
     void on_send_clicked();
+    void on_page_switched(GtkNotebookPage* page, guint page_num);
     void on_cross_clicked(Gtk::ScrolledWindow*);
 
     Gtk::Notebook nBook;
@@ -17,8 +19,12 @@ private:
     Gtk::VBox vBox;
     Gtk::HBox hBox;
 
-    Gtk::Button sendButton;
     Gtk::Entry writeEntry;
+    Gtk::Button sendButton;
+
+    std::vector<Gtk::TextView*> chatViews;
+
+    Glib::ustring nickName;
 };
 
 #endif // CHATWINDOW_HH

@@ -1,7 +1,7 @@
 #include "stdafx.hh"
 #include "namedialog.hh"
 
-NameDialog::NameDialog() : entry()
+NameDialog::NameDialog(FriendsWindow* fw) : parent(fw)
 {
     set_title("Choose nickname");
 
@@ -26,8 +26,7 @@ NameDialog::~NameDialog()
 
 void NameDialog::on_button_clicked()
 {
-// TODO (Juhana#1#): Tell somebody what the name actually is.
 
-    std::cout << entry.get_text() << std::endl;
+    parent->set_nick(entry.get_text());
     hide();
 }

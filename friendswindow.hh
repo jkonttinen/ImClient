@@ -6,10 +6,12 @@
 class FriendsWindow : public Gtk::Window
 {
 public:
-    FriendsWindow(std::list<Glib::ustring>);
+    FriendsWindow(const std::list<Glib::ustring>&);
     virtual ~FriendsWindow();
 
-    void set_namelist(std::list<Glib::ustring>);
+    void set_namelist(const std::list<Glib::ustring>&);
+    void set_nick(const Glib::ustring&);
+    Glib::ustring get_nick()const;
 private:
     //Signal handlers:
     void on_quit();
@@ -28,6 +30,8 @@ private:
 
     Gtk::VBox vBox;
     Gtk::HBox hBox;
+
+    Glib::ustring nickName;
 
     ChatWindow *chatWin;
 };

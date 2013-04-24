@@ -29,5 +29,6 @@
 #include <gtkmm/dialog.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/notebook.h>
+#include <gtkmm/textview.h>
 
 #endif //STDAFX_HH

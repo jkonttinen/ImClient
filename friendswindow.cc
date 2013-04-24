@@ -3,7 +3,7 @@
 #include "namedialog.hh"
 #include "chatwindow.hh"
 
-FriendsWindow::FriendsWindow(std::list<Glib::ustring> names)
+FriendsWindow::FriendsWindow(const std::list<Glib::ustring>& names)
     : m_Table(names.size(),1), m_Button_Close("Close"), m_Button_Chat("Chat"), chatWin(NULL)
 {
     set_title("Friends");
@@ -17,7 +17,7 @@ FriendsWindow::FriendsWindow(std::list<Glib::ustring> names)
     //menu stuff
     m_refActionGroup = Gtk::ActionGroup::create();
 
-    m_refActionGroup->add(Gtk::Action::create("FileMenu", "File"));
+    m_refActionGroup->add(Gtk::Action::create("FileMenu", "_File"));
     m_refActionGroup->add(Gtk::Action::create("FileNick", "Nickname"),
                           sigc::mem_fun(*this, &FriendsWindow::on_menu_nick));
     m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT),
@@ -76,7 +76,7 @@ FriendsWindow::~FriendsWindow()
     delete chatWin;
 }
 
-void FriendsWindow::set_namelist(std::list<Glib::ustring> names)
+void FriendsWindow::set_namelist(const std::list<Glib::ustring>& names)
 {
     for (auto it = buttons.begin(); it != buttons.end();) {
         m_Table.remove(*(it->second));
@@ -117,7 +117,7 @@ void FriendsWindow::on_button_chat()
 
     if (!names.empty()) {
         if (!(chatWin) || !(chatWin->get_is_drawable())) {
-            chatWin = new ChatWindow(names);
+            chatWin = new ChatWindow(names, nickName);
             chatWin->show();
         } else chatWin->new_tab(names);
     }
@@ -125,7 +125,18 @@ void FriendsWindow::on_button_chat()
 
 void FriendsWindow::on_menu_nick()
 {
-    NameDialog nd;
+    NameDialog nd(this);
     nd.run();
+}
+
+void FriendsWindow::set_nick(const Glib::ustring& name)
+{
+    nickName = name;
+    if (chatWin) chatWin->set_nick(name);
+}
+
+Glib::ustring FriendsWindow::get_nick()const
+{
+    return nickName;
 }
 
