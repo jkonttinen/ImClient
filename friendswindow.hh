@@ -17,6 +17,7 @@ private:
     void on_quit();
     void on_button_chat();
     void on_menu_nick();
+    void on_menu_connect();
 
     std::map<Glib::ustring, Gtk::ToggleButton*> buttons;
 

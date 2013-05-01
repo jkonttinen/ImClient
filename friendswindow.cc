@@ -18,6 +18,8 @@ FriendsWindow::FriendsWindow(const std::list<Glib::ustring>& names)
     m_refActionGroup = Gtk::ActionGroup::create();
 
     m_refActionGroup->add(Gtk::Action::create("FileMenu", "_File"));
+    m_refActionGroup->add(Gtk::Action::create("FileConnect", "Connect"),
+                          sigc::mem_fun(*this, &FriendsWindow::on_menu_connect));
     m_refActionGroup->add(Gtk::Action::create("FileNick", "Nickname"),
                           sigc::mem_fun(*this, &FriendsWindow::on_menu_nick));
     m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT),
@@ -32,6 +34,7 @@ FriendsWindow::FriendsWindow(const std::list<Glib::ustring>& names)
         "<ui>"
         "  <menubar name='MenuBar'>"
         "    <menu action='FileMenu'>"
+        "      <menuitem action='FileConnect'/>"
         "      <menuitem action='FileNick'/>"
         "      <separator/>"
         "      <menuitem action='FileQuit'/>"
@@ -121,6 +124,11 @@ void FriendsWindow::on_button_chat()
             chatWin->show();
         } else chatWin->new_tab(names);
     }
+}
+
+void FriendsWindow::on_menu_connect()
+{
+
 }
 
 void FriendsWindow::on_menu_nick()
