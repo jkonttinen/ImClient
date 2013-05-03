@@ -14,6 +14,10 @@
 #include <list>
 #include <map>
 
+#include <boost/bind.hpp>
+#include <boost/asio.hpp>
+#include <boost/thread/thread.hpp>
+
 //#include <gtkmm.h>      //OK for now. Only include what is needed later?
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>

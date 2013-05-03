@@ -2,6 +2,7 @@
 #include "friendswindow.hh"
 #include "namedialog.hh"
 #include "chatwindow.hh"
+#include "connection.hh"
 
 FriendsWindow::FriendsWindow(const std::list<Glib::ustring>& names)
     : m_Table(names.size(),1), m_Button_Close("Close"), m_Button_Chat("Chat"), chatWin(NULL)
@@ -77,6 +78,7 @@ FriendsWindow::FriendsWindow(const std::list<Glib::ustring>& names)
 FriendsWindow::~FriendsWindow()
 {
     delete chatWin;
+    delete connection;
 }
 
 void FriendsWindow::set_namelist(const std::list<Glib::ustring>& names)
@@ -128,7 +130,14 @@ void FriendsWindow::on_button_chat()
 
 void FriendsWindow::on_menu_connect()
 {
+    if (nickName == "") on_menu_nick();
 
+    boost::asio::io_service io_service;
+
+    boost::asio::ip::tcp::resolver resolver(io_service);
+    boost::asio::ip::tcp::resolver::query query("mip4.kyla.fi", "12345");
+    boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query);
+    connection = new Connection(io_service, iterator, nickName);
 }
 
 void FriendsWindow::on_menu_nick()

@@ -1,3 +1,4 @@
+#include "stdafx.hh"
 #include "messages.hh"
 
 Message::Message(const std::string& msg):content(msg)

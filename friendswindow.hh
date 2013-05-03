@@ -2,6 +2,7 @@
 #define FRIENDSWINDOW_HH
 
 #include "chatwindow.hh"
+#include "connection.hh"
 
 class FriendsWindow : public Gtk::Window
 {
@@ -35,6 +36,8 @@ private:
     Glib::ustring nickName;
 
     ChatWindow *chatWin;
+
+    Connection *connection;
 };
 
 #endif //FRIENDSWINDOW_HH
