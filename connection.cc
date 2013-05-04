@@ -5,41 +5,29 @@
 using boost::asio::ip::tcp;
 
 Connection::Connection(boost::asio::io_service& io_service,
-        tcp::resolver::iterator& iter, const std::string& name = "")
-        : io_service(io_service), socket(io_service), t(NULL), name(name)
+        tcp::resolver::iterator& iter)
+        : io_service(io_service), socket(io_service), iter(iter), connected(false)
 {
-    boost::asio::connect(socket, iter, error);
-    on_connect();
 }
 
 Connection::~Connection()
 {
-    if (t){
-        if (t->joinable()){
-            t->detach();
-            t->interrupt();
-            t->join();
-        }
-        delete t;
-    }
 }
 
-void Connection::on_connect()
+void Connection::connect(const Glib::ustring& name)
 {
+    nickName = name;
     std::stringstream ss;
-    ss << name.length();
+    ss << nickName.length();
+
+    boost::asio::connect(socket, iter, error);
 
     if (!error){
         boost::asio::write(socket, boost::asio::buffer(ss.str().c_str(), 4));
-        boost::asio::write(socket, boost::asio::buffer(name, name.length()));
-        t = new boost::thread(&Connection::listen, this);
+        boost::asio::write(socket, boost::asio::buffer(nickName.c_str(), nickName.length()));
+        t = boost::thread(&Connection::listen, this);
     }
-    else close();
-}
-
-void Connection::close()
-{
-    socket.close();
+    connected = true;
 }
 
 void Connection::listen()
@@ -48,7 +36,6 @@ void Connection::listen()
     size_t rv = 1;
     while (rv){
         strcpy(size,"");
-
         rv = boost::asio::read(socket, boost::asio::buffer(size,32));
         buf = new char[atoi(size)+1];
         rv = boost::asio::read(socket, boost::asio::buffer(buf,atoi(size)));
@@ -57,6 +44,9 @@ void Connection::listen()
         usleep(5);
         delete [] buf;
     }
-    //t->join();
-    close();
+}
+
+bool Connection::is_connected() const
+{
+    return connected;
 }

@@ -34,9 +34,11 @@ ChatWindow::ChatWindow(const std::list<Glib::ustring>& names, const Glib::ustrin
 ChatWindow::~ChatWindow()
 {
     chatViews.clear();
+    hide();
 }
 void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
 {
+    cwMutex.lock();
     Gtk::ScrolledWindow* sw = Gtk::manage(new Gtk::ScrolledWindow);
     Gtk::HBox* textBox = Gtk::manage(new Gtk::HBox);
     Gtk::Label* nameLabel = Gtk::manage(new Gtk::Label);
@@ -78,6 +80,7 @@ void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
     textBox->pack_start(*nameLabel, Gtk::PACK_SHRINK);
 
     nBook.append_page(*sw, *hb);
+    cwMutex.unlock();
     hb->show_all_children();
     nBook.show_all_children();
 }
@@ -108,5 +111,7 @@ void ChatWindow::on_cross_clicked(Gtk::ScrolledWindow* sw)
 
 void ChatWindow::set_nick(const Glib::ustring& name)
 {
+    cwMutex.lock();
     nickName = name;
+    cwMutex.unlock();
 }

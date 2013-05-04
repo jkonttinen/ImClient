@@ -25,6 +25,8 @@ private:
     std::vector<Gtk::TextView*> chatViews;
 
     Glib::ustring nickName;
+
+    boost::mutex cwMutex;
 };
 
 #endif // CHATWINDOW_HH

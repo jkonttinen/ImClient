@@ -4,8 +4,9 @@
 #include "chatwindow.hh"
 #include "connection.hh"
 
-FriendsWindow::FriendsWindow(const std::list<Glib::ustring>& names)
-    : m_Table(names.size(),1), m_Button_Close("Close"), m_Button_Chat("Chat"), chatWin(NULL)
+FriendsWindow::FriendsWindow(const std::list<Glib::ustring>& names, Connection* con)
+    : m_Table(names.size(),1), m_Button_Close("Close"), m_Button_Chat("Chat"),
+    chatWin(NULL), connection(con)
 {
     set_title("Friends");
     set_border_width(1);
@@ -58,7 +59,7 @@ FriendsWindow::FriendsWindow(const std::list<Glib::ustring>& names)
     set_namelist(names);
 
     m_Button_Close.signal_clicked().connect( sigc::mem_fun(*this,
-            &FriendsWindow::on_quit));
+                                            &FriendsWindow::on_quit));
     m_Button_Chat.signal_clicked().connect( sigc::mem_fun(*this,
                                             &FriendsWindow::on_button_chat));
 
@@ -77,12 +78,11 @@ FriendsWindow::FriendsWindow(const std::list<Glib::ustring>& names)
 
 FriendsWindow::~FriendsWindow()
 {
-    delete chatWin;
-    delete connection;
 }
 
 void FriendsWindow::set_namelist(const std::list<Glib::ustring>& names)
 {
+    fMutex.lock();
     for (auto it = buttons.begin(); it != buttons.end();) {
         m_Table.remove(*(it->second));
         auto help = it;
@@ -104,12 +104,13 @@ void FriendsWindow::set_namelist(const std::list<Glib::ustring>& names)
         m_Table.attach(*(it->second), 0, 1, i, i + 1);
         i++;
     }
-
+    fMutex.unlock();
     show_all_children();
 }
 
 void FriendsWindow::on_quit()
 {
+    if (chatWin) delete chatWin;
     hide();
 }
 
@@ -131,13 +132,8 @@ void FriendsWindow::on_button_chat()
 void FriendsWindow::on_menu_connect()
 {
     if (nickName == "") on_menu_nick();
-
-    boost::asio::io_service io_service;
-
-    boost::asio::ip::tcp::resolver resolver(io_service);
-    boost::asio::ip::tcp::resolver::query query("mip4.kyla.fi", "12345");
-    boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query);
-    connection = new Connection(io_service, iterator, nickName);
+    if (!connection->is_connected())
+        connection->connect(nickName);
 }
 
 void FriendsWindow::on_menu_nick()
@@ -148,7 +144,9 @@ void FriendsWindow::on_menu_nick()
 
 void FriendsWindow::set_nick(const Glib::ustring& name)
 {
+    fMutex.lock();
     nickName = name;
+    fMutex.unlock();
     if (chatWin) chatWin->set_nick(name);
 }
 

@@ -7,7 +7,7 @@
 class FriendsWindow : public Gtk::Window
 {
 public:
-    FriendsWindow(const std::list<Glib::ustring>&);
+    FriendsWindow(const std::list<Glib::ustring>&, Connection*);
     virtual ~FriendsWindow();
 
     void set_namelist(const std::list<Glib::ustring>&);
@@ -38,6 +38,7 @@ private:
     ChatWindow *chatWin;
 
     Connection *connection;
+    boost::mutex fMutex;
 };
 
 #endif //FRIENDSWINDOW_HH
