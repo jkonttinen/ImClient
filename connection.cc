@@ -12,6 +12,14 @@ Connection::Connection(boost::asio::io_service& io_service,
 
 Connection::~Connection()
 {
+    if (socket.is_open()){
+        socket.shutdown(tcp::socket::shutdown_both);
+        socket.close();
+        t.detach();
+        t.interrupt();
+        t.join();
+    }
+    else t.join();
 }
 
 void Connection::connect(const Glib::ustring& name)
@@ -23,11 +31,26 @@ void Connection::connect(const Glib::ustring& name)
     boost::asio::connect(socket, iter, error);
 
     if (!error){
+        connected = true;
         boost::asio::write(socket, boost::asio::buffer(ss.str().c_str(), 4));
         boost::asio::write(socket, boost::asio::buffer(nickName.c_str(), nickName.length()));
         t = boost::thread(&Connection::listen, this);
     }
-    connected = true;
+}
+
+void Connection::send_to(const Message& msg)
+{
+    if (connected){
+        size_t rv;
+        std::stringstream os,help;
+        os << msg.get_content(true);
+        help << os.str().size();
+
+        rv = boost::asio::write(socket, boost::asio::buffer(help.str().c_str(), 32));
+        if (!rv) std::cout <<"Error while trying to send" << std::endl;
+        rv = boost::asio::write(socket, boost::asio::buffer(os.str().c_str(), os.str().size()));
+        if (!rv) std::cout <<"Error while trying to send" << std::endl;
+    }
 }
 
 void Connection::listen()
@@ -36,14 +59,17 @@ void Connection::listen()
     size_t rv = 1;
     while (rv){
         strcpy(size,"");
-        rv = boost::asio::read(socket, boost::asio::buffer(size,32));
+        rv = boost::asio::read(socket, boost::asio::buffer(size,32),error);
         buf = new char[atoi(size)+1];
-        rv = boost::asio::read(socket, boost::asio::buffer(buf,atoi(size)));
+        rv = boost::asio::read(socket, boost::asio::buffer(buf,atoi(size)),error);
         buf[atoi(size)] = '\0';
         std::cout << buf << std::endl;
-        usleep(5);
+        Sleep(5);
         delete [] buf;
     }
+    socket.shutdown(tcp::socket::shutdown_both);
+    socket.close();
+    connected = false;
 }
 
 bool Connection::is_connected() const

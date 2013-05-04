@@ -1,6 +1,8 @@
 #ifndef CONNECTION_HH
 #define CONNECTION_HH
 
+#include "messages.hh"
+
 class Connection
 {
 public:
@@ -8,6 +10,7 @@ public:
     virtual ~Connection();
 
     void connect(const Glib::ustring&);
+    void send_to(const Message&);
     bool is_connected()const;
 private:
     void listen();
