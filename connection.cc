@@ -22,10 +22,11 @@ Connection::~Connection()
     else t.join();
 }
 
-void Connection::connect(const Glib::ustring& name, FriendsWindow* fwin)
+void Connection::connect(const Glib::ustring& name, Glib::Dispatcher* disp, FriendsWindow* fwin)
 {
-    this->fwin = fwin;
     nickName = name;
+    this->disp = disp;
+    this->fwin = fwin;
     std::stringstream ss;
     ss << nickName.length();
 
@@ -67,7 +68,8 @@ void Connection::listen()
         Message msg(buf);
         std::cout << buf << std::endl;
         if (msg.get_type() == Message::EXIT) break;
-        fwin->handle_msg(msg);
+        fwin->new_msg(msg);
+        (*disp)();
         Sleep(5);
         delete [] buf;
     }

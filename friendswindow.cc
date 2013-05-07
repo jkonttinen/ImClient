@@ -59,10 +59,10 @@ FriendsWindow::FriendsWindow(Connection* con)
     //set_namelist(names);
 
     m_Button_Close.signal_clicked().connect( sigc::mem_fun(*this,
-            &FriendsWindow::on_quit));
+                            &FriendsWindow::on_quit));
     m_Button_Chat.signal_clicked().connect( sigc::mem_fun(*this,
-                                            &FriendsWindow::on_button_chat));
-
+                            &FriendsWindow::on_button_chat));
+    disp.connect(sigc::mem_fun(*this,&FriendsWindow::handle_msg));
 
     vBox.pack_start(m_ScrolledWindow);
     vBox.pack_start(hBox, Gtk::PACK_SHRINK,1);
@@ -82,7 +82,6 @@ FriendsWindow::~FriendsWindow()
 
 void FriendsWindow::set_namelist(const std::list<Glib::ustring>& names)
 {
-    fMutex.lock();
     for (auto it = buttons.begin(); it != buttons.end();) {
         m_Table.remove(*(it->second));
         auto help = it;
@@ -104,15 +103,35 @@ void FriendsWindow::set_namelist(const std::list<Glib::ustring>& names)
         m_Table.attach(*(it->second), 0, 1, i, i + 1);
         i++;
     }
-    fMutex.unlock();
     show_all_children();
 }
 
-void FriendsWindow::handle_msg(const Message& msg)
+void FriendsWindow::new_msg(const Message& msg){
+    msg_queue.push(new Message(msg.get_content(true)));
+}
+
+void FriendsWindow::handle_msg()
 {
+    Message msg(msg_queue.front()->get_content(true));
+    delete msg_queue.front();
+    msg_queue.pop();
     switch(msg.get_type()) {
+//    case Message::CHAT_MESSAGE:
+//    case Message::INVITE:
+//    case Message::LIST_CHAT:
     case Message::MESSAGE: {
-//        chatWin
+        if (chatWin && !chatWin->get_is_drawable()) {
+            delete chatWin;
+            chatWin = NULL;
+        }
+        if (!chatWin) {
+            std::list<Glib::ustring> names;
+            names.push_back(msg.get_info());
+            std::cout << names.front() << std::endl;
+            chatWin = new ChatWindow(names, nickName,connection);
+            chatWin->show();
+        }
+        chatWin->handle_msg(msg);
         break;
     }
     case Message::LIST_ALL: {
@@ -143,7 +162,11 @@ void FriendsWindow::on_button_chat()
             names.push_back(it->second->get_label());
 
     if (!names.empty()) {
-        if (!(chatWin) || !(chatWin->get_is_drawable())) {
+        if (chatWin && !chatWin->get_is_drawable()) {
+            delete chatWin;
+            chatWin = NULL;
+        }
+        if (!(chatWin)) {
             chatWin = new ChatWindow(names, nickName,connection);
             chatWin->show();
         } else chatWin->new_tab(names);
@@ -154,7 +177,7 @@ void FriendsWindow::on_menu_connect()
 {
     if (nickName == "") on_menu_nick();
     if (!connection->is_connected())
-        connection->connect(nickName, this);
+        connection->connect(nickName,&disp,this);
     connection->send_to(Message("",Message::LIST_ALL));
 }
 
@@ -166,9 +189,7 @@ void FriendsWindow::on_menu_nick()
 
 void FriendsWindow::set_nick(const Glib::ustring& name)
 {
-    fMutex.lock();
     nickName = name;
-    fMutex.unlock();
     if (chatWin) chatWin->set_nick(name);
 }
 

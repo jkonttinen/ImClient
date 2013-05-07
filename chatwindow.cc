@@ -2,7 +2,7 @@
 #include "chatwindow.hh"
 
 ChatWindow::ChatWindow(const std::list<Glib::ustring>& names, const Glib::ustring& nickName,
-                        Connection* con)
+                       Connection* con)
     : sendButton("Send"), nickName(nickName), connection(con)
 {
     set_title("Chat");
@@ -34,13 +34,12 @@ ChatWindow::ChatWindow(const std::list<Glib::ustring>& names, const Glib::ustrin
 
 ChatWindow::~ChatWindow()
 {
-    for (auto it = chatViews.begin();it != chatViews.end();it++)
+    for (auto it = chatViews.begin(); it != chatViews.end(); it++)
         delete (*it);
     hide();
 }
 void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
 {
-    cwMutex.lock();
     Gtk::ScrolledWindow* sw = Gtk::manage(new Gtk::ScrolledWindow);
     Gtk::HBox* textBox = Gtk::manage(new Gtk::HBox);
     Gtk::Label* nameLabel = Gtk::manage(new Gtk::Label);
@@ -88,7 +87,7 @@ void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
     textBox->pack_start(*nameLabel, Gtk::PACK_SHRINK);
 
     nBook.append_page(*sw, *hb);
-    cwMutex.unlock();
+
     hb->show_all_children();
     nBook.show_all_children();
 }
@@ -96,12 +95,10 @@ void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
 void ChatWindow::on_send_clicked()
 {
     if (!writeEntry.get_text_length()) return;
-    chatViews[nBook.get_current_page()]->get_buffer()->set_text(
-        chatViews[nBook.get_current_page()]->get_buffer()->get_text()
-        + nickName + ": " + writeEntry.get_text() +"\n");
+    set_view_text(nBook.get_current_page(),nickName, writeEntry.get_text());
 
     connection->send_to(Message(writeEntry.get_text(),Message::MESSAGE,
-                        tags[nBook.get_current_page()]));
+                                tags[nBook.get_current_page()]));
     writeEntry.set_text("");
 }
 
@@ -123,7 +120,37 @@ void ChatWindow::on_cross_clicked(Gtk::ScrolledWindow* sw)
 
 void ChatWindow::set_nick(const Glib::ustring& name)
 {
-    cwMutex.lock();
     nickName = name;
-    cwMutex.unlock();
+}
+
+void ChatWindow::set_view_text(size_t page, const Glib::ustring& name, const Glib::ustring& msg)
+{
+    chatViews[page]->get_buffer()->set_text(chatViews[page]->get_buffer()->get_text()
+                        + name + ": " + msg +"\n");
+}
+
+void ChatWindow::handle_msg(const Message& msg)
+{
+    switch (msg.get_type()) {
+    case Message::MESSAGE: {
+        size_t i;
+        for (i = 0;i < tags.size();i++){
+            if (msg.get_info() == tags[i]){
+                set_view_text(i,msg.get_info(),msg.get_content(false));
+                break;
+            }
+        }
+
+        if (i == tags.size()){
+            std::list<Glib::ustring> names;
+            names.push_back(msg.get_info());
+            new_tab(names);
+            set_view_text(i, msg.get_info(), msg.get_content(false));
+        }
+
+        break;
+    }
+    default:
+        break;
+    }
 }

@@ -12,7 +12,7 @@ public:
     Connection(boost::asio::io_service&, boost::asio::ip::tcp::resolver::iterator&);
     virtual ~Connection();
 
-    void connect(const Glib::ustring&, FriendsWindow*);
+    void connect(const Glib::ustring&,Glib::Dispatcher*, FriendsWindow*);
     void send_to(const Message&);
     bool is_connected()const;
 private:
@@ -25,10 +25,11 @@ private:
     boost::thread t;
     boost::mutex cMutex;
 
+    Glib::Dispatcher* disp;
     Glib::ustring nickName;
     bool connected;
 
-    FriendsWindow* fwin;
+    FriendsWindow *fwin;
 };
 
 #endif // CONNECTION_HH
