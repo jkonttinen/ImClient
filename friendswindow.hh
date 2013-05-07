@@ -4,15 +4,19 @@
 #include "chatwindow.hh"
 #include "connection.hh"
 
+class Connection;
+class ChatWindow;
+
 class FriendsWindow : public Gtk::Window
 {
 public:
-    FriendsWindow(const std::list<Glib::ustring>&, Connection*);
+    FriendsWindow(Connection*);
     virtual ~FriendsWindow();
 
     void set_namelist(const std::list<Glib::ustring>&);
     void set_nick(const Glib::ustring&);
     Glib::ustring get_nick()const;
+    void handle_msg(const Message&);
 private:
     //Signal handlers:
     void on_quit();

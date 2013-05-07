@@ -1,8 +1,9 @@
 #include "stdafx.hh"
 #include "chatwindow.hh"
 
-ChatWindow::ChatWindow(const std::list<Glib::ustring>& names, const Glib::ustring& nickName = "")
-    : sendButton("Send"), nickName(nickName)
+ChatWindow::ChatWindow(const std::list<Glib::ustring>& names, const Glib::ustring& nickName,
+                        Connection* con)
+    : sendButton("Send"), nickName(nickName), connection(con)
 {
     set_title("Chat");
     set_size_request(600,400);
@@ -33,7 +34,8 @@ ChatWindow::ChatWindow(const std::list<Glib::ustring>& names, const Glib::ustrin
 
 ChatWindow::~ChatWindow()
 {
-    chatViews.clear();
+    for (auto it = chatViews.begin();it != chatViews.end();it++)
+        delete (*it);
     hide();
 }
 void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
@@ -44,6 +46,12 @@ void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
     Gtk::Label* nameLabel = Gtk::manage(new Gtk::Label);
 
     chatViews.push_back(new Gtk::TextView);
+    if (names.size() == 1)
+        tags.push_back(names.front());
+    else {
+        connection->send_to(Message("new",Message::INVITE,names.front()));
+        tags.push_back("waiting");
+    }
 
     sw->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
@@ -92,6 +100,8 @@ void ChatWindow::on_send_clicked()
         chatViews[nBook.get_current_page()]->get_buffer()->get_text()
         + nickName + ": " + writeEntry.get_text() +"\n");
 
+    connection->send_to(Message(writeEntry.get_text(),Message::MESSAGE,
+                        tags[nBook.get_current_page()]));
     writeEntry.set_text("");
 }
 
@@ -103,7 +113,9 @@ void ChatWindow::on_page_switched(GtkNotebookPage* page, guint page_num)
 
 void ChatWindow::on_cross_clicked(Gtk::ScrolledWindow* sw)
 {
+    delete (chatViews[nBook.page_num(*sw)]);
     chatViews.erase(chatViews.begin() + nBook.page_num(*sw));
+    tags.erase(tags.begin() + nBook.page_num(*sw));
     nBook.remove(*sw);
     if (!nBook.get_n_pages())
         hide();

@@ -13,7 +13,7 @@ Connection::Connection(boost::asio::io_service& io_service,
 Connection::~Connection()
 {
     if (socket.is_open()){
-        socket.shutdown(tcp::socket::shutdown_both);
+        //socket.shutdown(tcp::socket::shutdown_both);
         socket.close();
         t.detach();
         t.interrupt();
@@ -22,8 +22,9 @@ Connection::~Connection()
     else t.join();
 }
 
-void Connection::connect(const Glib::ustring& name)
+void Connection::connect(const Glib::ustring& name, FriendsWindow* fwin)
 {
+    this->fwin = fwin;
     nickName = name;
     std::stringstream ss;
     ss << nickName.length();
@@ -63,7 +64,10 @@ void Connection::listen()
         buf = new char[atoi(size)+1];
         rv = boost::asio::read(socket, boost::asio::buffer(buf,atoi(size)),error);
         buf[atoi(size)] = '\0';
+        Message msg(buf);
         std::cout << buf << std::endl;
+        if (msg.get_type() == Message::EXIT) break;
+        fwin->handle_msg(msg);
         Sleep(5);
         delete [] buf;
     }

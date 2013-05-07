@@ -2,6 +2,9 @@
 #define CONNECTION_HH
 
 #include "messages.hh"
+#include "friendswindow.hh"
+
+class FriendsWindow;
 
 class Connection
 {
@@ -9,7 +12,7 @@ public:
     Connection(boost::asio::io_service&, boost::asio::ip::tcp::resolver::iterator&);
     virtual ~Connection();
 
-    void connect(const Glib::ustring&);
+    void connect(const Glib::ustring&, FriendsWindow*);
     void send_to(const Message&);
     bool is_connected()const;
 private:
@@ -24,6 +27,8 @@ private:
 
     Glib::ustring nickName;
     bool connected;
+
+    FriendsWindow* fwin;
 };
 
 #endif // CONNECTION_HH

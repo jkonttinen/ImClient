@@ -4,8 +4,8 @@
 #include "chatwindow.hh"
 #include "connection.hh"
 
-FriendsWindow::FriendsWindow(const std::list<Glib::ustring>& names, Connection* con)
-    : m_Table(names.size(),1), m_Button_Close("Close"), m_Button_Chat("Chat"),
+FriendsWindow::FriendsWindow(Connection* con)
+    : m_Table(1,1), m_Button_Close("Close"), m_Button_Chat("Chat"),
     chatWin(NULL), connection(con)
 {
     set_title("Friends");
@@ -56,10 +56,10 @@ FriendsWindow::FriendsWindow(const std::list<Glib::ustring>& names, Connection* 
 
     m_ScrolledWindow.add(m_Table);
 
-    set_namelist(names);
+    //set_namelist(names);
 
     m_Button_Close.signal_clicked().connect( sigc::mem_fun(*this,
-                                            &FriendsWindow::on_quit));
+            &FriendsWindow::on_quit));
     m_Button_Chat.signal_clicked().connect( sigc::mem_fun(*this,
                                             &FriendsWindow::on_button_chat));
 
@@ -108,6 +108,27 @@ void FriendsWindow::set_namelist(const std::list<Glib::ustring>& names)
     show_all_children();
 }
 
+void FriendsWindow::handle_msg(const Message& msg)
+{
+    switch(msg.get_type()) {
+    case Message::MESSAGE: {
+//        chatWin
+        break;
+    }
+    case Message::LIST_ALL: {
+        std::stringstream help;
+        std::string str;
+        std::list<Glib::ustring> names;
+        help << msg;
+        while(help >> str) names.push_back(str);
+        set_namelist(names);
+        break;
+    }
+    default:
+        break;
+    }
+}
+
 void FriendsWindow::on_quit()
 {
     if (chatWin) delete chatWin;
@@ -123,7 +144,7 @@ void FriendsWindow::on_button_chat()
 
     if (!names.empty()) {
         if (!(chatWin) || !(chatWin->get_is_drawable())) {
-            chatWin = new ChatWindow(names, nickName);
+            chatWin = new ChatWindow(names, nickName,connection);
             chatWin->show();
         } else chatWin->new_tab(names);
     }
@@ -133,7 +154,8 @@ void FriendsWindow::on_menu_connect()
 {
     if (nickName == "") on_menu_nick();
     if (!connection->is_connected())
-        connection->connect(nickName);
+        connection->connect(nickName, this);
+    connection->send_to(Message("",Message::LIST_ALL));
 }
 
 void FriendsWindow::on_menu_nick()

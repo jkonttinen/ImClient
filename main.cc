@@ -12,15 +12,16 @@ int main(int argc, char *argv[])
 
     Gtk::Main kit(argc, argv);
 
-    std::list<Glib::ustring> asd;
-    asd.push_back("rambake");
-    asd.push_back("damb");
-    asd.push_back("Jusku");
-    asd.push_back("Mr. Nobody's Friend");
-    asd.push_back("diukkari");
-    asd.push_back("Mr. Mianki");
+//    std::list<Glib::ustring> asd;
+//    asd.push_back("");
+//    asd.push_back("rambake");
+//    asd.push_back("damb");
+//    asd.push_back("Jusku");
+//    asd.push_back("Mr. Nobody's Friend");
+//    asd.push_back("diukkari");
+//    asd.push_back("Mr. Mianki");
 
-    FriendsWindow window(asd, &con);
+    FriendsWindow window(&con);
     //Shows the window and returns when it is closed.
     Gtk::Main::run(window);
 
