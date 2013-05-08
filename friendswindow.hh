@@ -44,6 +44,7 @@ private:
 
     ChatWindow *chatWin;
     Connection *connection;
+    boost::mutex mutex;
 };
 
 #endif //FRIENDSWINDOW_HH

@@ -23,7 +23,6 @@ private:
     boost::asio::ip::tcp::resolver::iterator& iter;
     boost::system::error_code error;
     boost::thread t;
-    boost::mutex cMutex;
 
     Glib::Dispatcher* disp;
     Glib::ustring nickName;

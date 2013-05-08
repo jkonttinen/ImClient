@@ -78,6 +78,11 @@ FriendsWindow::FriendsWindow(Connection* con)
 
 FriendsWindow::~FriendsWindow()
 {
+    if (chatWin) delete chatWin;
+    while(msg_queue.size() > 0){
+        delete msg_queue.front();
+        msg_queue.pop();
+    }
 }
 
 void FriendsWindow::set_namelist(const std::list<Glib::ustring>& names)
@@ -91,6 +96,7 @@ void FriendsWindow::set_namelist(const std::list<Glib::ustring>& names)
             it1++;
             if (it1 == names.end()) buttons.erase(it);
         }
+        if (!names.size()) buttons.clear();
         it = help;
     }
     for (auto it = names.begin(); it != names.end(); it++) {
@@ -107,11 +113,14 @@ void FriendsWindow::set_namelist(const std::list<Glib::ustring>& names)
 }
 
 void FriendsWindow::new_msg(const Message& msg){
+    mutex.lock();
     msg_queue.push(new Message(msg.get_content(true)));
+    mutex.unlock();
 }
 
 void FriendsWindow::handle_msg()
 {
+    mutex.lock();
     Message msg(msg_queue.front()->get_content(true));
     delete msg_queue.front();
     msg_queue.pop();
@@ -146,16 +155,17 @@ void FriendsWindow::handle_msg()
     default:
         break;
     }
+    mutex.unlock();
 }
 
 void FriendsWindow::on_quit()
 {
-    if (chatWin) delete chatWin;
     hide();
 }
 
 void FriendsWindow::on_button_chat()
 {
+    mutex.lock();
     std::list<Glib::ustring> names;
     for (auto it = buttons.begin(); it != buttons.end(); it++)
         if (it->second->get_active())
@@ -171,6 +181,7 @@ void FriendsWindow::on_button_chat()
             chatWin->show();
         } else chatWin->new_tab(names);
     }
+    mutex.unlock();
 }
 
 void FriendsWindow::on_menu_connect()
@@ -178,7 +189,7 @@ void FriendsWindow::on_menu_connect()
     if (nickName == "") on_menu_nick();
     if (!connection->is_connected())
         connection->connect(nickName,&disp,this);
-    connection->send_to(Message("",Message::LIST_ALL));
+    //connection->send_to(Message("",Message::LIST_ALL));
 }
 
 void FriendsWindow::on_menu_nick()
@@ -189,8 +200,10 @@ void FriendsWindow::on_menu_nick()
 
 void FriendsWindow::set_nick(const Glib::ustring& name)
 {
+    mutex.lock();
     nickName = name;
     if (chatWin) chatWin->set_nick(name);
+    mutex.unlock();
 }
 
 Glib::ustring FriendsWindow::get_nick()const
