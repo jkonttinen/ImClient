@@ -24,6 +24,8 @@ private:
     void on_menu_connect();
     void set_namelist(const std::list<Glib::ustring>&);
     void handle_msg();
+    void info_msg(const Glib::ustring&, const Glib::ustring&);
+    bool create_chatwin(const std::list<Glib::ustring>&);
 
     std::map<Glib::ustring, Gtk::ToggleButton*> buttons;
     std::queue<Message*> msg_queue;

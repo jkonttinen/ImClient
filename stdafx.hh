@@ -33,6 +33,7 @@
 #include <gtkmm/actiongroup.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/dialog.h>
+#include <gtkmm/messagedialog.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/textview.h>

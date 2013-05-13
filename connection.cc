@@ -38,6 +38,10 @@ void Connection::connect(const Glib::ustring& name, Glib::Dispatcher* disp, Frie
         boost::asio::write(socket, boost::asio::buffer(nickName.c_str(), nickName.length()));
         t = boost::thread(&Connection::listen, this);
     }
+    else {
+        fwin->new_msg(Message(Message::EXIT,nickName));
+        (*disp)();
+    }
 }
 
 void Connection::send_to(const Message& msg)
@@ -67,9 +71,9 @@ void Connection::listen()
         buf[atoi(size)] = '\0';
         Message msg(buf);
         std::cout << buf << std::endl;
-        if (msg.get_type() == Message::EXIT) break;
         fwin->new_msg(msg);
         (*disp)();
+        if (msg.get_type() == Message::EXIT) break;
         Sleep(5);
         delete [] buf;
     }

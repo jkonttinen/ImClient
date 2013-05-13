@@ -26,7 +26,6 @@ NameDialog::~NameDialog()
 
 void NameDialog::on_button_clicked()
 {
-
     parent->set_nick(entry.get_text());
     hide();
 }

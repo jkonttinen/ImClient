@@ -33,8 +33,12 @@ private:
     std::vector<Glib::ustring> tags;
 
     Glib::ustring nickName;
+    std::list<Glib::ustring> groupNames;
 
     Connection* connection;
+
+    const Glib::ustring waiting;
+    const Glib::ustring initiate;
 };
 
 #endif // CHATWINDOW_HH
