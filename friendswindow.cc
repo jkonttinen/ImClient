@@ -64,6 +64,7 @@ FriendsWindow::FriendsWindow(Connection* con)
                                             &FriendsWindow::on_button_chat));
     disp.connect(sigc::mem_fun(*this,&FriendsWindow::handle_msg));
 
+
     vBox.pack_start(m_ScrolledWindow);
     vBox.pack_start(hBox, Gtk::PACK_SHRINK,1);
 
@@ -147,11 +148,15 @@ void FriendsWindow::handle_msg()
     case Message::INVITE: {
         std::list<Glib::ustring> names;
         names.push_back("Group Chat");
-        create_chatwin(names);
+        create_chatwin(names) ;
         chatWin->handle_msg(msg);
         break;
     }
-//    case Message::LIST_CHAT:
+    case Message::PART_CHAT:
+    case Message::LIST_CHAT: {
+        if (chatWin && chatWin->is_drawable()) chatWin->handle_msg(msg);
+        break;
+    }
     case Message::MESSAGE: {
         std::list<Glib::ustring> names;
         names.push_back(msg.get_name());
@@ -171,7 +176,6 @@ void FriendsWindow::handle_msg()
                 str = std::string("");
             }
         }
-        //names.push_back(str);
         set_namelist(names);
         break;
     }

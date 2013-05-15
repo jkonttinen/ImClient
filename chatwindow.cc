@@ -3,7 +3,7 @@
 
 ChatWindow::ChatWindow(const std::list<Glib::ustring>& names, const Glib::ustring& nickName,
                        Connection* con)
-    : sendButton("Send"), nickName(nickName), connection(con), waiting("waiting"), initiate("You initiated")
+    : sendButton("Send"), nickName(nickName), connection(con), waiting("waiting")
 {
     set_title("Chat");
     set_size_request(600,400);
@@ -29,6 +29,8 @@ ChatWindow::ChatWindow(const std::list<Glib::ustring>& names, const Glib::ustrin
                                         &ChatWindow::on_send_clicked));
     nBook.signal_switch_page().connect(sigc::mem_fun(*this,
                                        &ChatWindow::on_page_switched));
+    signal_hide().connect(sigc::mem_fun(*this,&ChatWindow::on_close));
+
     show_all_children();
 }
 
@@ -39,13 +41,16 @@ ChatWindow::~ChatWindow()
         connection->send_to(Message(Message::PART_CHAT,nickName,"",tags[i++]));
         delete (*it);
     }
-    hide();
+    chatViews.clear();
+    for (auto it = chatters.begin();it != chatters.end();it++)
+        delete *it;
+    //hide();
 }
 void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
 {
     Gtk::ScrolledWindow* sw = Gtk::manage(new Gtk::ScrolledWindow);
     Gtk::HBox* textBox = Gtk::manage(new Gtk::HBox);
-    Gtk::Label* nameLabel = Gtk::manage(new Gtk::Label);
+    chatters.push_back(new Gtk::Label);
 
     chatViews.push_back(new Gtk::TextView);
 
@@ -63,7 +68,7 @@ void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
     for (auto it = names.begin(); it != names.end(); it++) {
         auto help = it;
         help++;
-        nameLabel->set_label(nameLabel->get_label() + (*it) + '\n');
+        chatters.back()->set_label(chatters.back()->get_label() + (*it) + '\n');
         if (help != names.end()) str += (*it) + ", ";
         else str += (*it);
     }
@@ -85,12 +90,12 @@ void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
     chatViews.back()->set_wrap_mode(Gtk::WRAP_WORD_CHAR);
     chatViews.back()->set_editable(false);
 
-    nameLabel->set_size_request(120,0);
-    nameLabel->set_alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_TOP);
+    chatters.back()->set_size_request(120,0);
+    chatters.back()->set_alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_TOP);
 
     sw->add(*textBox);
     textBox->pack_start(*(chatViews.back()));
-    textBox->pack_start(*nameLabel, Gtk::PACK_SHRINK);
+    textBox->pack_start(*chatters.back(), Gtk::PACK_SHRINK);
 
     nBook.append_page(*sw, *hb);
 
@@ -98,11 +103,21 @@ void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
     nBook.show_all_children();
 }
 
+void ChatWindow::on_close()
+{
+    size_t i = 0;
+    for (auto it = chatViews.begin(); it != chatViews.end(); it++){
+        connection->send_to(Message(Message::PART_CHAT,nickName,"",tags[i++]));
+        delete (*it);
+    }
+    chatViews.clear();
+}
+
 void ChatWindow::on_send_clicked()
 {
     if (!writeEntry.get_text_length()) return;
     set_view_text(nBook.get_current_page(),nickName, writeEntry.get_text());
-    //std::cout << tags[nBook.get_current_page()] << std::endl;
+
     if (tags[nBook.get_current_page()].find("Chat") == std::string::npos)
         connection->send_to(Message(Message::MESSAGE, tags[nBook.get_current_page()],
                                 writeEntry.get_text()));
@@ -165,7 +180,7 @@ void ChatWindow::handle_msg(const Message& msg)
     }
 
     case Message::INVITE: {
-        if (msg.get_content(false).find(initiate) != std::string::npos){
+        if (msg.get_name() == nickName){
             for (size_t i = 0;i < tags.size();i++){
                 if (tags[i] == waiting){
                     tags[i] = msg.get_chat();
@@ -174,11 +189,52 @@ void ChatWindow::handle_msg(const Message& msg)
                             connection->send_to(Message(Message::INVITE, *it, nickName, msg.get_chat()));
                 }
             }
+
         }
-        else tags.back() = msg.get_chat();
+        else {
+            if (tags.back() == "Group Chat") tags.back() = msg.get_chat();
+            else {
+                tags.push_back(msg.get_chat());
+                std::list<Glib::ustring> names;
+                names.push_back("Group Chat");
+                new_tab(names);
+            }
+        }
+        connection->send_to(Message(Message::LIST_CHAT,nickName,"",msg.get_chat()));
+        break;
+    }
+    case Message::LIST_CHAT: {
+        for (size_t i = 0;i < tags.size();i++){
+            if (tags[i] == msg.get_chat()){
+                Glib::ustring str = msg.get_content(false), help;
+                chatters[i]->set_label("");
+
+                for (size_t j = 0;j < str.size();j++){
+                    if (str[j] != '~') help += str[j];
+                    else {
+                        (chatters[i])->set_label((chatters[i])->get_label() + help + '\n');
+                        help = "";
+                    }
+                }
+                break;
+            }
+        }
+        break;
+    }
+    case Message::PART_CHAT: {
+        if (msg.get_name() != nickName){
+            for (size_t i = 0;i < tags.size();i++)
+                if (tags[i] == msg.get_chat()){
+                    Glib::ustring str = ":* " + msg.get_name() + " " + msg.get_content(false) + " *";
+                    set_view_text(i, str, "");
+                }
+
+            connection->send_to(Message(Message::LIST_CHAT,nickName,"",msg.get_chat()));
+        }
         break;
     }
     default:
         break;
     }
+//    show_all_children();
 }

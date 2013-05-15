@@ -19,6 +19,8 @@ private:
     void on_send_clicked();
     void on_page_switched(GtkNotebookPage* page, guint page_num);
     void on_cross_clicked(Gtk::ScrolledWindow*);
+    void on_close();
+
     void set_view_text(size_t page, const Glib::ustring& name, const Glib::ustring& msg);
 
     Gtk::Notebook nBook;
@@ -34,11 +36,11 @@ private:
 
     Glib::ustring nickName;
     std::list<Glib::ustring> groupNames;
+    std::vector<Gtk::Label*> chatters;
 
     Connection* connection;
 
     const Glib::ustring waiting;
-    const Glib::ustring initiate;
 };
 
 #endif // CHATWINDOW_HH
