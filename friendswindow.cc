@@ -148,7 +148,7 @@ void FriendsWindow::handle_msg()
     case Message::INVITE: {
         std::list<Glib::ustring> names;
         names.push_back("Group Chat");
-        create_chatwin(names) ;
+        if (msg.get_name() != nickName && !create_chatwin(names)) chatWin->new_tab(names);
         chatWin->handle_msg(msg);
         break;
     }
