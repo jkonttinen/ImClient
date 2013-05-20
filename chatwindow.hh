@@ -18,7 +18,7 @@ public:
 private:
     void on_send_clicked();
     void on_page_switched(GtkNotebookPage* page, guint page_num);
-    void on_cross_clicked(Gtk::ScrolledWindow*);
+    void on_cross_clicked(Gtk::HBox*);
     void on_close();
 
     void set_view_text(size_t page, const Glib::ustring& name, const Glib::ustring& msg);
@@ -30,13 +30,14 @@ private:
 
     Gtk::Entry writeEntry;
     Gtk::Button sendButton;
+    Gtk::Label nameLabel;
 
     std::vector<Gtk::TextView*> chatViews;
     std::vector<Glib::ustring> tags;
+    std::vector<Gtk::Label*> chatters;
 
     Glib::ustring nickName;
     std::list<Glib::ustring> groupNames;
-    std::vector<Gtk::Label*> chatters;
 
     Connection* connection;
 

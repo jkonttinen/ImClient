@@ -50,8 +50,8 @@ void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
 {
     Gtk::ScrolledWindow* sw = Gtk::manage(new Gtk::ScrolledWindow);
     Gtk::HBox* textBox = Gtk::manage(new Gtk::HBox);
-    chatters.push_back(new Gtk::Label);
 
+    chatters.push_back(new Gtk::Label);
     chatViews.push_back(new Gtk::TextView);
 
     sw->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -82,8 +82,8 @@ void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
     Gtk::Image* img = Gtk::manage(new Gtk::Image(Gtk::Stock::CLOSE,
                                   Gtk::ICON_SIZE_MENU));
     button->add(*img);
-    button->signal_clicked().connect(sigc::bind<Gtk::ScrolledWindow*>(sigc::mem_fun(*this,
-                                     &ChatWindow::on_cross_clicked), sw) );
+    button->signal_clicked().connect(sigc::bind<Gtk::HBox*>(sigc::mem_fun(*this,
+                                     &ChatWindow::on_cross_clicked), textBox) );
     hb->pack_start(*label);
     hb->pack_start(*button, Gtk::PACK_SHRINK);
 
@@ -93,11 +93,11 @@ void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
     chatters.back()->set_size_request(120,0);
     chatters.back()->set_alignment(Gtk::ALIGN_CENTER, Gtk::ALIGN_TOP);
 
-    sw->add(*textBox);
-    textBox->pack_start(*(chatViews.back()));
+    sw->add(*(chatViews.back()));
+    textBox->pack_start(*sw);
     textBox->pack_start(*chatters.back(), Gtk::PACK_SHRINK);
 
-    nBook.append_page(*sw, *hb);
+    nBook.append_page(*textBox, *hb);
 
     hb->show_all_children();
     nBook.show_all_children();
@@ -132,13 +132,13 @@ void ChatWindow::on_page_switched(GtkNotebookPage* page, guint page_num)
     writeEntry.grab_focus();
 }
 
-void ChatWindow::on_cross_clicked(Gtk::ScrolledWindow* sw)
+void ChatWindow::on_cross_clicked(Gtk::HBox* hb)
 {
-    delete (chatViews[nBook.page_num(*sw)]);
-    chatViews.erase(chatViews.begin() + nBook.page_num(*sw));
-    connection->send_to(Message(Message::PART_CHAT, nickName,"",tags[nBook.page_num(*sw)]));
-    tags.erase(tags.begin() + nBook.page_num(*sw));
-    nBook.remove(*sw);
+    delete (chatViews[nBook.page_num(*hb)]);
+    chatViews.erase(chatViews.begin() + nBook.page_num(*hb));
+    connection->send_to(Message(Message::PART_CHAT, nickName,"",tags[nBook.page_num(*hb)]));
+    tags.erase(tags.begin() + nBook.page_num(*hb));
+    nBook.remove(*hb);
     if (!nBook.get_n_pages())
         hide();
 }
@@ -152,6 +152,8 @@ void ChatWindow::set_view_text(size_t page, const Glib::ustring& name, const Gli
 {
     chatViews[page]->get_buffer()->set_text(chatViews[page]->get_buffer()->get_text()
                                             + name + ": " + msg +"\n");
+    Gtk::TextIter endIt = chatViews[page]->get_buffer()->end();
+    chatViews[page]->scroll_to(endIt);
 }
 
 void ChatWindow::handle_msg(const Message& msg)

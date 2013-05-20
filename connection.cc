@@ -74,7 +74,7 @@ void Connection::listen()
         fwin->new_msg(msg);
         (*disp)();
         if (msg.get_type() == Message::EXIT) break;
-        Sleep(5);
+        usleep(5);
         delete [] buf;
     }
     socket.shutdown(tcp::socket::shutdown_both);

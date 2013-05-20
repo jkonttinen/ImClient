@@ -37,5 +37,6 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/textview.h>
+#include <gtkmm/textbuffer.h>
 
 #endif //STDAFX_HH
