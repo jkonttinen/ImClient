@@ -35,6 +35,7 @@ private:
     std::vector<Gtk::TextView*> chatViews;
     std::vector<Glib::ustring> tags;
     std::vector<Gtk::Label*> chatters;
+    std::vector<bool> online;
 
     Glib::ustring nickName;
     std::list<Glib::ustring> groupNames;

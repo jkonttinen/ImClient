@@ -177,6 +177,7 @@ void FriendsWindow::handle_msg()
             }
         }
         set_namelist(names);
+        if (chatWin && chatWin->is_drawable()) chatWin->handle_msg(msg);
         break;
     }
     case Message::EXIT: {

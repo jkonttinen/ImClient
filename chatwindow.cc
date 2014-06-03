@@ -56,6 +56,8 @@ void ChatWindow::new_tab(const std::list<Glib::ustring>& names)
 
     sw->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
+    online.push_back(true);
+
     if (names.size() == 1)
             tags.push_back(names.front());
     else {
@@ -225,6 +227,28 @@ void ChatWindow::handle_msg(const Message& msg)
                 }
 
             connection->send_to(Message(Message::LIST_CHAT,nickName,"",msg.get_chat()));
+        }
+        break;
+    }
+    case Message::LIST_ALL: {
+        std::stringstream str;
+        str << msg;
+        std::string help = str.str();
+        for (size_t i = 0; i < tags.size(); i++) {
+            if (tags[i].find("Chat") != std::string::npos) continue;
+            if (str.str().find(std::string(tags[i])) == std::string::npos) {
+                if (online[i]) {
+                    Glib::ustring ustr = ":* " + tags[i] + " is offline." " *";
+                    set_view_text(i, ustr, "");
+                    online[i] = false;
+                }
+            }
+            else if (!online[i]) {
+                Glib::ustring ustr = ":* " + tags[i] + " is online." " *";
+                set_view_text(i, ustr, "");
+                online[i] = true;
+            }
+
         }
         break;
     }
